@@ -1,6 +1,5 @@
 ExtendedCalendarView
 ====================
-
 ![ScreenShot](https://raw.githubusercontent.com/tyczj/ExtendedCalendarView/master/ExtendedCalendarView/Screenshot_2014-04-04-18-11-16.png)
 
 Currently there is no easy way of showing a calendar with the ability to display events on days, ExtendedCalendarView is meant to solve that problem.
@@ -77,3 +76,83 @@ To add an event to the content provider you need the start time, end time, julia
 		Uri uri = getContentResolver().insert(CalendarProvider.CONTENT_URI, values);
 		
 julian start day is generated for you when the month is built so all you would have to do it call day.getStartDay() on the day and it will give you the julian day
+
+
+i show the informations in a listview below the calendar.
+==========
+
+like this.
+[Show event information with ExtendedCalendarView](http://stackoverflow.com/questions/26143047/show-event-information-with-extendedcalendarview)
+
+![带日程](http://i.stack.imgur.com/0NxSK.png)
+
+```java
+
+public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_layout_location_site_calendar);
+        this.ctx = this;
+
+        this.extendedCalendarView = (ExtendedCalendarView) findViewById(R.id.extendedCalendarView_addLocationSiteCalendar_CALENDAR);
+        this.listViewCalendar = (ListView) findViewById(R.id.listView_addLocationSiteCalendar_CALENDARLIST);
+        //Disable Scrolling
+        this.listViewCalendar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
+        this.extendedCalendarView.setGesture(ExtendedCalendarView.LEFT_RIGHT_GESTURE);
+        addEvent();//test
+        addEvent2();//test
+
+        initExtras(savedInstanceState);
+        initListener();
+    }
+
+
+private void initListener() {
+        extendedCalendarView.setOnDayClickListener(new ExtendedCalendarView.OnDayClickListener() {
+            @Override
+            public void onDayClicked(AdapterView<?> adapter, View view, int position, long id, Day day) {
+                ArrayList<HashMap<Integer, String>> eventList = new ArrayList<HashMap<Integer, String>>();
+                for (Event e : day.getEvents()) {
+                    HashMap<Integer, String> event = new HashMap<Integer, String>();
+                    event.put(NumericValues.LISTROW_ID_IMG_T_ST_IDC_KEY_TITLE, e.getTitle());
+                    event.put(NumericValues.LISTROW_ID_IMG_T_ST_IDC_KEY_SUBTITLE, e.getDescription());
+                    event.put(NumericValues.LISTROW_ID_IMG_T_ST_IDC_KEY_INDICATOR, e.getStartDate("hh:mm") + " - " + e.getEndDate("hh:mm"));
+                    eventList.add(event);
+                }
+                CalendarListViewAdapter listAdapter = new CalendarListViewAdapter(_this, eventList);
+                listViewCalendar.setAdapter(listAdapter);
+                ListViewUtil.setListViewHeightBasedOnChildren(listViewCalendar);
+            }
+        });
+    }
+```
+
+```xml
+<ScrollView
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+       <com.tyczj.extendedcalendarview.ExtendedCalendarView
+            android:id="@+id/extendedCalendarView_addLocationSiteCalendar_CALENDAR"
+            android:layout_height="350dp"
+            android:layout_width="match_parent" />
+        <ListView
+            android:id="@+id/listView_addLocationSiteCalendar_CALENDARLIST"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/list_divider"
+            android:dividerHeight="1px"
+            android:listSelector="@drawable/contacts_list_selector" />
+    </LinearLayout>
+</ScrollView>
+```
